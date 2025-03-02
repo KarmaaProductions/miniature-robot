@@ -6,7 +6,6 @@ export function setupCanvas(canvas) {
     ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
     document.body.appendChild(canvas);
 
-    // Ensure canvas resizes dynamically
     window.addEventListener("resize", () => {
         canvas.width = window.innerWidth * window.devicePixelRatio;
         canvas.height = window.innerHeight * window.devicePixelRatio;
