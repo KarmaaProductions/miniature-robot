@@ -4,25 +4,32 @@ import { Particle } from "./particle.js";
 import { applyPlayerGradient } from "./playerGradient.js";
 
 export class Player {
-    constructor(game) {
-        this.game = game;
-        this.x = 100;
-        this.y = 100;
+    constructor({ canvas }) {
+        this.canvas = canvas;
+        this.x = canvas.width / 2 - 10; // Center horizontally
+        this.y = canvas.height - 50; // Near the bottom
         this.speed = 5;
     }
 
     update() {
-        // Handle movement logic (e.g., arrow keys or WASD)
+        // Movement logic (you can enhance this for keyboard controls)
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "ArrowLeft" && this.x > 0) {
+                this.x -= this.speed;
+            } else if (event.key === "ArrowRight" && this.x < this.canvas.width - 20) {
+                this.x += this.speed;
+            }
+        });
     }
 
     render(ctx) {
         applyPlayerGradient(ctx, this.x, this.y);
     }
 
-    shoot() {
-        this.game.bullets.push(new Bullet(this.game, this.x + 10, this.y));
+    shoot(bullets, particles) {
+        bullets.push(new Bullet(this.x + 10, this.y));
         for (let i = 0; i < 10; i++) {
-            this.game.particles.push(new Particle(this.x + 10, this.y));
+            particles.push(new Particle(this.x + 10, this.y));
         }
     }
 }
