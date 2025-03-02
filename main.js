@@ -24,6 +24,8 @@ export class Game {
         this.running = false;
         this.physics = new Physics(this);
         this.ui = new UI(this);
+
+        document.addEventListener("click", () => this.player.shoot());
     }
 
     start() {
@@ -43,6 +45,7 @@ export class Game {
         this.enemies.forEach(enemy => enemy.update());
         this.bullets.forEach(bullet => bullet.update());
         this.physics.checkCollisions();
+        this.bullets = this.bullets.filter(bullet => !bullet.offScreen);
     }
 
     render() {
@@ -69,6 +72,30 @@ export class Player {
         ctx.fillStyle = "blue";
         ctx.fillRect(this.x, this.y, 20, 20);
     }
+    shoot() {
+        this.game.bullets.push(new Bullet(this.game, this.x + 10, this.y));
+    }
 }
 
-// Other files (enemy.js, bullet.js, physics.js, ui.js) will follow a similar modular pattern.
+// bullet.js - Handles bullet movement and rendering
+export class Bullet {
+    constructor(game, x, y) {
+        this.game = game;
+        this.x = x;
+        this.y = y;
+        this.speed = 10;
+        this.width = 5;
+        this.height = 10;
+        this.offScreen = false;
+    }
+    update() {
+        this.y -= this.speed;
+        if (this.y < 0) this.offScreen = true;
+    }
+    render(ctx) {
+        ctx.fillStyle = "red";
+        ctx.fillRect(this.x, this.y, this.width, this.height);
+    }
+}
+
+// Other files (enemy.js, physics.js, ui.js) will follow a similar modular pattern.
