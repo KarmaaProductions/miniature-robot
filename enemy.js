@@ -1,11 +1,11 @@
-// enemy.js - Handles enemy movement and behavior
+// enemy.js - Handles enemy movement and rendering
 import { applyEnemyGradient } from "./enemyGradient.js";
 
 export class Enemy {
-    constructor(game) {
-        this.game = game;
-        this.x = Math.random() * game.canvas.width;
-        this.y = Math.random() * game.canvas.height / 2; // Spawn in upper half
+    constructor({ canvas }) {
+        this.canvas = canvas;
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height / 2; // Spawn in upper half
         this.width = 20;
         this.height = 20;
         this.speed = 2;
@@ -14,7 +14,7 @@ export class Enemy {
 
     update() {
         this.x += this.speed * this.direction;
-        if (this.x <= 0 || this.x + this.width >= this.game.canvas.width) {
+        if (this.x <= 0 || this.x + this.width >= this.canvas.width) {
             this.direction *= -1; // Bounce off walls
         }
         this.y += Math.sin(this.x / 50) * 2; // Wave-like movement
