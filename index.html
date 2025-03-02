@@ -5,18 +5,124 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2D Shooter Game</title>
     <style>
-        /* Optional: Add basic styling */
         body {
             margin: 0;
             overflow: hidden; /* Prevent scrolling */
         }
         canvas {
             display: block;
-            background: black; /* Default game background */
+            background: black; /* Background color for the game */
         }
     </style>
 </head>
 <body>
-    <script type="module" src="./main.js"></script>
+    <script>
+        // Setup canvas and context
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        document.body.appendChild(canvas);
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth * window.devicePixelRatio;
+            canvas.height = window.innerHeight * window.devicePixelRatio;
+            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        }
+        resizeCanvas();
+        window.addEventListener("resize", resizeCanvas);
+
+        // Game objects
+        const player = {
+            x: canvas.width / 2 - 10,
+            y: canvas.height - 50,
+            width: 20,
+            height: 20,
+            speed: 5,
+            color: "blue",
+            update() {
+                if (keys["ArrowLeft"] && this.x > 0) this.x -= this.speed;
+                if (keys["ArrowRight"] && this.x < canvas.width - this.width) this.x += this.speed;
+            },
+            render() {
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.width, this.height);
+            }
+        };
+
+        const bullets = [];
+        const enemies = [];
+
+        function spawnEnemies() {
+            for (let i = 0; i < 5; i++) {
+                enemies.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height / 2,
+                    width: 20,
+                    height: 20,
+                    speed: 2,
+                    direction: Math.random() < 0.5 ? 1 : -1,
+                    color: "green",
+                    update() {
+                        this.x += this.speed * this.direction;
+                        if (this.x <= 0 || this.x + this.width >= canvas.width) {
+                            this.direction *= -1;
+                        }
+                        this.y += Math.sin(this.x / 50) * 2;
+                    },
+                    render() {
+                        ctx.fillStyle = this.color;
+                        ctx.fillRect(this.x, this.y, this.width, this.height);
+                    }
+                });
+            }
+        }
+        spawnEnemies();
+
+        // Input handling
+        const keys = {};
+        window.addEventListener("keydown", e => keys[e.key] = true);
+        window.addEventListener("keyup", e => keys[e.key] = false);
+
+        document.addEventListener("click", () => {
+            bullets.push({
+                x: player.x + player.width / 2 - 2.5,
+                y: player.y,
+                width: 5,
+                height: 10,
+                speed: 10,
+                color: "red",
+                update() {
+                    this.y -= this.speed;
+                },
+                render() {
+                    ctx.fillStyle = this.color;
+                    ctx.fillRect(this.x, this.y, this.width, this.height);
+                }
+            });
+        });
+
+        // Game loop
+        function update() {
+            player.update();
+            bullets.forEach((bullet, index) => {
+                bullet.update();
+                if (bullet.y + bullet.height < 0) bullets.splice(index, 1);
+            });
+            enemies.forEach(enemy => enemy.update());
+        }
+
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            player.render();
+            bullets.forEach(bullet => bullet.render());
+            enemies.forEach(enemy => enemy.render());
+        }
+
+        function gameLoop() {
+            update();
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+        gameLoop();
+    </script>
 </body>
 </html>
