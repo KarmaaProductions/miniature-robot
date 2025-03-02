@@ -11,7 +11,7 @@
         }
         canvas {
             display: block;
-            background: black; /* Background color for the game */
+            background: black; /* Default game background */
         }
     </style>
 </head>
@@ -22,15 +22,15 @@
         const ctx = canvas.getContext("2d");
         document.body.appendChild(canvas);
 
+        // Dynamically resize canvas to fit the window
         function resizeCanvas() {
-            canvas.width = window.innerWidth * window.devicePixelRatio;
-            canvas.height = window.innerHeight * window.devicePixelRatio;
-            ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         }
         resizeCanvas();
-        window.addEventListener("resize", resizeCanvas);
+        window.addEventListener("resize", resizeCanvas); // Adjust canvas on window resize
 
-        // Game objects
+        // Player object
         const player = {
             x: canvas.width / 2 - 10,
             y: canvas.height - 50,
@@ -39,6 +39,7 @@
             speed: 5,
             color: "blue",
             update() {
+                // Movement logic
                 if (keys["ArrowLeft"] && this.x > 0) this.x -= this.speed;
                 if (keys["ArrowRight"] && this.x < canvas.width - this.width) this.x += this.speed;
             },
@@ -48,40 +49,8 @@
             }
         };
 
+        // Bullets array
         const bullets = [];
-        const enemies = [];
-
-        function spawnEnemies() {
-            for (let i = 0; i < 5; i++) {
-                enemies.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height / 2,
-                    width: 20,
-                    height: 20,
-                    speed: 2,
-                    direction: Math.random() < 0.5 ? 1 : -1,
-                    color: "green",
-                    update() {
-                        this.x += this.speed * this.direction;
-                        if (this.x <= 0 || this.x + this.width >= canvas.width) {
-                            this.direction *= -1;
-                        }
-                        this.y += Math.sin(this.x / 50) * 2;
-                    },
-                    render() {
-                        ctx.fillStyle = this.color;
-                        ctx.fillRect(this.x, this.y, this.width, this.height);
-                    }
-                });
-            }
-        }
-        spawnEnemies();
-
-        // Input handling
-        const keys = {};
-        window.addEventListener("keydown", e => keys[e.key] = true);
-        window.addEventListener("keyup", e => keys[e.key] = false);
-
         document.addEventListener("click", () => {
             bullets.push({
                 x: player.x + player.width / 2 - 2.5,
@@ -100,18 +69,51 @@
             });
         });
 
-        // Game loop
+        // Enemies array
+        const enemies = [];
+        function spawnEnemies() {
+            for (let i = 0; i < 5; i++) {
+                enemies.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height / 2,
+                    width: 20,
+                    height: 20,
+                    speed: 2,
+                    direction: Math.random() < 0.5 ? 1 : -1,
+                    color: "green",
+                    update() {
+                        this.x += this.speed * this.direction;
+                        if (this.x <= 0 || this.x + this.width >= canvas.width) {
+                            this.direction *= -1;
+                        }
+                        this.y += Math.sin(this.x / 50) * 2; // Wave-like movement
+                    },
+                    render() {
+                        ctx.fillStyle = this.color;
+                        ctx.fillRect(this.x, this.y, this.width, this.height);
+                    }
+                });
+            }
+        }
+        spawnEnemies();
+
+        // Input handling
+        const keys = {};
+        window.addEventListener("keydown", e => keys[e.key] = true);
+        window.addEventListener("keyup", e => keys[e.key] = false);
+
+        // Game loop functions
         function update() {
             player.update();
             bullets.forEach((bullet, index) => {
                 bullet.update();
-                if (bullet.y + bullet.height < 0) bullets.splice(index, 1);
+                if (bullet.y + bullet.height < 0) bullets.splice(index, 1); // Remove off-screen bullets
             });
             enemies.forEach(enemy => enemy.update());
         }
 
         function render() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
             player.render();
             bullets.forEach(bullet => bullet.render());
             enemies.forEach(enemy => enemy.render());
@@ -120,9 +122,10 @@
         function gameLoop() {
             update();
             render();
-            requestAnimationFrame(gameLoop);
+            requestAnimationFrame(gameLoop); // Loop the game
         }
-        gameLoop();
+
+        gameLoop(); // Start the game loop
     </script>
 </body>
 </html>
